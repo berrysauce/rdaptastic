@@ -123,25 +123,22 @@
             </div>
 
             <!-- FORM -->
-            <script>
-                // if using synchronous loading, will be called once the DOM is ready
-                turnstile.ready(function () {
-                    turnstile.render("#turnstile-container", {
-                        sitekey: "0x4AAAAAAA2Mra45KtkZeImy",
-                        callback: function (token) {
-                            turnstileToken = token;
-                        },
-                    });
-                });
-            </script>
             <form style="margin-bottom: 32px;margin-top: 48px;" onsubmit={handleSubmit}>
                 <div class="input-group">
                     <input class="form-control" type="text" bind:value={domain} style="padding: 8px 16px;border-radius: 0px;background: rgba(255,255,255,0);border-top-right-radius: 0px;border-bottom-right-radius: 0px;outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);border-right-style: none;" placeholder="example.com" name="domain" required>
+                    <!-- Invisible Turnstile -->
+                    <div
+                        class="cf-turnstile"
+                        data-sitekey="0x4AAAAAAA2Mra45KtkZeImy"
+                        data-action="submit-form"
+                        data-callback={(token: string) => turnstileToken = token}
+                        data-theme="light"
+                    ></div>
                     <button class="btn btn-primary float-end" type="submit" style="border-radius: 0px;background: rgb(0,0,0);border-top-left-radius: 0px;border-bottom-left-radius: 0px;margin-left: -2px;padding: 8px 16px;color: rgb(255,255,255);outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);">
                         <IconSearch size={18} stroke={2} class="mb-1" style="margin-right: 4px;" />
                         Check
                     </button>
-                    <div id="turnstile-container" style="display: none;"></div>
+                    <div id="turnstile-container"></div>
                 </div>
             </form>
 
