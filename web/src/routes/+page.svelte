@@ -216,12 +216,12 @@
                                     }
                                         <li class="text-break" style="margin-bottom: 16px;font-weight: 700;color: {colorError};font-size: 14px;">
                                             <IconAlertCircleFilled size={20} stroke={2} class="mb-1" style="margin-right: 6px;" />
-                                            ISSUES DETECTED
+                                            ISSUE(S) DETECTED
                                         </li>
                                     {:else}
                                         <li class="text-break" style="margin-bottom: 16px;font-weight: 700;color: {colorSuccess};font-size: 14px;">
                                             <IconDiscountCheckFilled size={21} stroke={2} class="mb-1" style="margin-right: 6px;" />
-                                            EVERYTHING OK
+                                            NO ISSUES DETECTED
                                         </li>
                                     {/if}
                                 </ul>
