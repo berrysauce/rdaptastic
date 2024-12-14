@@ -95,6 +95,8 @@
             resultError = (error as Error)?.message || "unknown"
         } finally {
             resultLoading = false;
+            // @ts-ignore
+            window.turnstile.reset(); // Reset the Turnstile widget
         }
     };
 
