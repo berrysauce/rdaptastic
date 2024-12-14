@@ -68,7 +68,14 @@ app.post("/v1/rdap", async (c) => {
 
         try {
             const tld: string = domain.split(".").pop() || "";
-            const rdapUrl = await fetchRdapUrl(tld);
+
+            let rdapUrl: string;
+            try {
+                rdapUrl = await fetchRdapUrl(tld);
+            } catch {
+                c.status(412);
+                return c.text("No RDAP server found for TLD");
+            }
 
             const rdapResponse = await fetch(`${rdapUrl}/domain/${domain}`);
 

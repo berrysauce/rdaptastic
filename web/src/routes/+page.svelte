@@ -64,7 +64,7 @@
 
         try {
             if (!turnstileResponse) {
-                throw new Error("Turnstile response empty")
+                throw new Error("captcha")
             }
 
             const response = await fetch("https://api.rdaptastic.com/v1/rdap", {
@@ -79,12 +79,20 @@
             });
 
             if (response.status !== 200) {
-                throw new Error("Error retrieving RDAP data");
+                if (response.status == 403) {
+                    throw new Error("captcha")
+                } else if (response.status == 404) {
+                    throw new Error("no_domain")
+                } else if (response.status == 412) {
+                    throw new Error("no_service")
+                } else {
+                    throw new Error("unknown");
+                }
             }
 
             result = await response.json();
         } catch (error) {
-            resultError = "error";
+            resultError = (error as Error)?.message || "unknown"
         } finally {
             resultLoading = false;
         }
@@ -155,26 +163,32 @@
 
             {#if resultError && !resultLoading && !result}
                 <div class="text-start" style="margin-top: 64px;margin-bottom: 64px;padding: 16px 0px;">
-                    <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                        <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                        Error retrieving RDAP data
-                    </p>
+                    {#if resultError == "captcha"}
+                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
+                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
+                            CAPTCHA failed
+                        </p>
+                    {:else if resultError == "no_service"}
+                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
+                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
+                            No RDAP service found for TLD
+                        </p>
+                    {:else if resultError == "no_domain"}
+                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
+                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
+                            Domain not found on RDAP service
+                        </p>
+                    {:else}
+                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
+                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
+                            Error retrieving RDAP data
+                        </p>
+                    {/if}
+
                     <!--
                     <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
                         <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                        No RDAP service found for TLD
-                    </p>
-                    <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                        <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                        Domain not found on RDAP service
-                    </p>
-                    <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                        <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
                         Request rate-limited
-                    </p>
-                    <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                        <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                        Captcha failed
                     </p>
                     -->
                 </div>
