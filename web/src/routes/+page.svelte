@@ -168,7 +168,7 @@
                     {#if resultError == "captcha"}
                         <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
                             <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                            CAPTCHA failed
+                            CAPTCHA failed – please reload and try again
                         </p>
                     {:else if resultError == "no_service"}
                         <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
