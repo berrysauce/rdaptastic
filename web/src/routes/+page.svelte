@@ -14,8 +14,8 @@
     } from "@tabler/icons-svelte";
     import { differenceInDays } from "date-fns";
 
-    let colorSuccess = "#26931d";
-    let colorError = "#d72323";
+    const colorSuccess = "#26931d";
+    const colorError = "#d72323";
 
     const currentYear = new Date().getFullYear();
 
@@ -45,7 +45,6 @@
         dnssec: boolean;
     }
 
-    let turnstileToken: string | null = $state(null);
     let domain: string | null = $state(null);
     let result: Result | null = $state(null);
     let resultLoading: boolean = $state(false);
@@ -56,9 +55,18 @@
         result = null;
         resultError = null;
         resultLoading = true;
-        event.preventDefault();
+
+        let formData = new FormData(event.target);
+        let turnstileResponse = formData.get("cf-turnstile-response");
+        console.log("CF Turnstile response", turnstileResponse)
+
+        event.preventDefault(); // Prevent form submission
 
         try {
+            if (!turnstileResponse) {
+                throw new Error("Turnstile response empty")
+            }
+
             const response = await fetch("https://api.rdaptastic.com/v1/rdap", {
                 method: "POST",
                 headers: {
@@ -66,7 +74,7 @@
                 },
                 body: JSON.stringify({ 
                     domain: domain,
-                    captcha: turnstileToken,
+                    turnstile_response: turnstileResponse,
                 }),
             });
 
@@ -86,10 +94,10 @@
         const date = new Date(isoDate);
 
         // Format the date part
-        const formattedDate = new Intl.DateTimeFormat('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
+        const formattedDate = new Intl.DateTimeFormat("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
         }).format(date);
 
         // Format the time part
@@ -130,9 +138,6 @@
                     <div
                         class="cf-turnstile"
                         data-sitekey="0x4AAAAAAA2Mra45KtkZeImy"
-                        data-action="submit-form"
-                        data-callback={(token: string) => turnstileToken = token}
-                        data-theme="light"
                     ></div>
                     <button class="btn btn-primary float-end" type="submit" style="border-radius: 0px;background: rgb(0,0,0);border-top-left-radius: 0px;border-bottom-left-radius: 0px;margin-left: -2px;padding: 8px 16px;color: rgb(255,255,255);outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);">
                         <IconSearch size={18} stroke={2} class="mb-1" style="margin-right: 4px;" />

@@ -29,11 +29,11 @@ app.post("/v1/rdap", async (c) => {
 
         // @ts-ignore
         const domain = body.domain;
-		const captchaToken = body.captcha;
+		const turnstileResponse = body.turnstile_response;
 		const remoteIP = c.req.header("cf-connecting-ip");
 
 		// validate capcha (Cloudflare Turnstile)
-		if (!captchaToken) {
+		if (!turnstileResponse) {
 			c.status(400);
 			return c.text("No captcha provided");
 		} else {
@@ -42,7 +42,7 @@ app.post("/v1/rdap", async (c) => {
 			const turnstileResult = await fetch(url, {
 				body: JSON.stringify({
 					secret: TURNSTILE_SECRET,
-					response: captchaToken,
+					response: turnstileResponse,
 					remoteip: remoteIP
 				}),
 				method: "POST",
