@@ -34,3 +34,4 @@ lerna-debug.log*
 
 # Cloudflare
 wrangler.toml
+api/wrangler.toml
