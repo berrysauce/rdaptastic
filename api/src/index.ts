@@ -30,6 +30,9 @@ app.post("/v1/rdap", async (c) => {
         const featureCfTurnstile = await isFeatureEnabled(
             "cf-turnstile", POSTHOG_HOST, POSTHOG_API_KEY, c.req.header("cf-connecting-ip") || "anonymous"
         );
+        const featureASNLookups = await isFeatureEnabled(
+            "asn-lookups", POSTHOG_HOST, POSTHOG_API_KEY, c.req.header("cf-connecting-ip") || "anonymous"
+        );
 
         const body = await c.req.json();
         const full = c.req.query("full");
@@ -192,7 +195,12 @@ app.post("/v1/rdap", async (c) => {
 				lastChangedEvent = null;
 			}
 
-            const asn_result = await resolveNameserversAndFetchASN(nameservers);
+            let asn_result: any;
+            if (featureASNLookups) {
+                asn_result = await resolveNameserversAndFetchASN(nameservers);
+            } else {
+                asn_result = null;
+            }
 
             // @ts-ignore
             return c.json({

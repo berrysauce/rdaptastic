@@ -20,10 +20,16 @@
 
     const currentYear = new Date().getFullYear();
 
-    let feature_cf_turnstile: boolean = $state(false);
+    let feature_cf_turnstile: boolean = $state(false); // default to false to prevent premature loading of the Turnstile widget
+    let feature_asn_lookups: boolean = $state(false);
     posthog.onFeatureFlags(() => {
+        // cf-turnstile
         feature_cf_turnstile = posthog.isFeatureEnabled("cf-turnstile") || false;
         console.log("CF Turnstile enabled:", feature_cf_turnstile);
+
+        // asn-lookups
+        feature_asn_lookups = posthog.isFeatureEnabled("asn-lookups") || false;
+        console.log("ASN lookups enabled:", feature_asn_lookups);
     })
 
     interface Result {
@@ -367,32 +373,37 @@
                     </div>
 
                     <!-- NAMESERVERS -->
-                    <div style="margin-bottom: 16px;border-width: 2px;border-top-style: solid;border-top-color: rgb(0,0,0);">
-                        <div class="row" style="margin-top: 16px;">
-                            <div class="col-md-4 col-xl-4">
-                                <h2 class="fs-5" style="font-weight: 500;letter-spacing: -0.5px;color: rgb(0,0,0);margin-bottom: 16px;">Nameservers</h2>
-                            </div>
-                            <div class="col">
-                                <!-- Nameservers -->
-                                <ul class="list-unstyled mt-1" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);">
-                                    <li class="text-break text-lowercase" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
-                                        {#each result.nameservers as nameserver}
-                                            {nameserver}<br>
-                                        {/each}
-                                    </li>
-                                </ul><span class="text-truncate" style="font-weight: 500;font-size: 14px;">Nameserver ASNs</span>
-                                
-                                <!-- Nameserver ASNs -->
-                                <ul class="list-unstyled" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);margin-top: 4px;">
-                                    <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
-                                        {#each result.asn as asn}
-                                            <img class="mb-1" src="https://flagcdn.com/16x12/{asn.country.toLowerCase()}.webp" alt="{asn.country}"> {asn.description} {asn.asn}<br>
-                                        {/each}
-                                    </li>
-                                </ul>
+                    {#if result.nameservers && result.nameservers.length > 0}
+                        <div style="margin-bottom: 16px;border-width: 2px;border-top-style: solid;border-top-color: rgb(0,0,0);">
+                            <div class="row" style="margin-top: 16px;">
+                                <div class="col-md-4 col-xl-4">
+                                    <h2 class="fs-5" style="font-weight: 500;letter-spacing: -0.5px;color: rgb(0,0,0);margin-bottom: 16px;">Nameservers</h2>
+                                </div>
+                                <div class="col">
+                                    <!-- Nameservers -->
+                                    <ul class="list-unstyled mt-1" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);">
+                                        <li class="text-break text-lowercase" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
+                                            {#each result.nameservers as nameserver}
+                                                {nameserver}<br>
+                                            {/each}
+                                        </li>
+                                    </ul>
+                                    
+                                    <!-- Nameserver ASNs -->
+                                    {#if feature_asn_lookups && result.asn && result.asn.length > 0}
+                                        <span class="text-truncate" style="font-weight: 500;font-size: 14px;">Nameserver ASNs</span>
+                                        <ul class="list-unstyled" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);margin-top: 4px;">
+                                            <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
+                                                {#each result.asn as asn}
+                                                    <img class="mb-1" src="https://flagcdn.com/16x12/{asn.country.toLowerCase()}.webp" alt="{asn.country}"> {asn.description} {asn.asn}<br>
+                                                {/each}
+                                            </li>
+                                        </ul>
+                                    {/if}
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    {/if}
                 </div>
             {/if}
 

@@ -1,5 +1,5 @@
 const fetchRdapUrl = async (tld: string) => {
-	const ianaUrl = 'https://data.iana.org/rdap/dns.json';
+	const ianaUrl = "https://data.iana.org/rdap/dns.json";
 	const response = await fetch(ianaUrl);
 	const data = await response.json();
   
