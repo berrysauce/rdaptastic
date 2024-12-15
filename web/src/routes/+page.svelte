@@ -6,8 +6,8 @@
         IconDiscountCheckFilled,
         IconRefreshAlert,
         IconShieldChevron,
-        IconShield,
-        IconEyeOff,
+        IconLock,
+        IconLockOff,
         IconWorld,
         IconMailExclamation,
         IconCake,
@@ -80,7 +80,8 @@
 
         try {
             if (feature_cf_turnstile && !turnstileResponse) {
-                throw new Error("captcha")
+                resultError = "CAPTCHA failed – please reload and try again";
+                throw new Error("CAPTCHA failed");
             }
 
             const response = await fetch("https://api.rdaptastic.com/v1/rdap", {
@@ -95,20 +96,12 @@
             });
 
             if (response.status !== 200) {
-                if (response.status == 403) {
-                    throw new Error("captcha")
-                } else if (response.status == 404) {
-                    throw new Error("no_domain")
-                } else if (response.status == 412) {
-                    throw new Error("no_service")
-                } else {
-                    throw new Error("unknown");
-                }
+                resultError = await response.text();
             }
 
             result = await response.json();
         } catch (error) {
-            resultError = (error as Error)?.message || "unknown"
+            resultError = resultError || "Unknown error";
         } finally {
             resultLoading = false;
 
@@ -186,35 +179,11 @@
             {/if}
 
             {#if resultError && !resultLoading && !result}
-                <div class="text-start" style="margin-top: 64px;margin-bottom: 64px;padding: 16px 0px;">
-                    {#if resultError == "captcha"}
-                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                            CAPTCHA failed – please reload and try again
-                        </p>
-                    {:else if resultError == "no_service"}
-                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                            No RDAP service found for TLD
-                        </p>
-                    {:else if resultError == "no_domain"}
-                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                            Domain not found on RDAP service
-                        </p>
-                    {:else}
-                        <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
-                            <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                            Error retrieving RDAP data
-                        </p>
-                    {/if}
-
-                    <!--
+                <div class="text-start" style="margin-top: 48px;margin-bottom: 48px;padding: 16px 0px;">
                     <p style="text-align: center;font-weight: 500;margin-bottom: 0px;">
                         <IconExclamationCircle size={24} stroke={2} color={colorError} class="mb-1" style="margin-right: 8px;" />
-                        Request rate-limited
+                        {resultError}
                     </p>
-                    -->
                 </div>
             {/if}
 
@@ -233,8 +202,10 @@
                                 <!-- Status notification -->
                                 <ul class="list-unstyled mt-1">
                                     {#if 
-                                        (result.dates.expires && daysUntil(result.dates.expires) < 30) ||
-                                        !result.dnssec
+                                        (result.dates.expires && (daysSince(result.dates.expires) >= 1 || result.status.includes("pending delete"))) ||
+                                        (result.dates.expires && daysUntil(result.dates.expires) <= 30) ||
+                                        !result.dnssec ||
+                                        !result.status.includes("client transfer prohibited")
                                     }
                                         <li class="text-break" style="margin-bottom: 16px;font-weight: 700;color: {colorError};font-size: 14px;">
                                             <IconAlertCircleFilled size={20} stroke={2} class="mb-1" style="margin-right: 6px;" />
@@ -250,7 +221,13 @@
 
                                 <!-- Status details -->
                                 <ul class="list-unstyled">
-                                    {#if result.dates.expires && daysUntil(result.dates.expires) < 30}
+                                    <!-- negative -->
+                                    {#if result.dates.expires && (daysSince(result.dates.expires) >= 1 || result.status.includes("pending delete"))}
+                                        <li class="text-break" style="margin-bottom: 6px;/*font-weight: 600;*/font-size: 14px;">
+                                            <IconExclamationCircle size={20} stroke={2} color={colorError} class="mb-1" style="margin-right: 6px;" />
+                                            <span style="font-weight: 600;">Expired</span>
+                                        </li>
+                                    {:else if result.dates.expires && daysUntil(result.dates.expires) <= 30}
                                         <li class="text-break" style="margin-bottom: 6px;/*font-weight: 600;*/font-size: 14px;">
                                             <IconRefreshAlert size={20} stroke={2} color={colorError} class="mb-1" style="margin-right: 6px;" />
                                             Expires in <span style="font-weight: 600;">{daysUntil(result.dates.expires)} days</span>
@@ -264,6 +241,14 @@
                                         </li>
                                     {/if}
 
+                                    {#if !result.status.includes("client transfer prohibited")}
+                                        <li class="text-break" style="margin-bottom: 6px;font-size: 14px;">
+                                            <IconLockOff size={20} stroke={2} color={colorError} class="mb-1" style="margin-right: 6px;" />
+                                            <span style="font-weight: 600;">Transfer-Lock</span> not detected
+                                        </li>
+                                    {/if}
+
+                                    <!-- positive -->
                                     {#if result.dnssec}
                                         <li class="text-break" style="margin-bottom: 6px;font-size: 14px;">
                                             <IconShieldChevron size={20} stroke={2} color={colorSuccess} class="mb-1" style="margin-right: 6px;" />
@@ -271,9 +256,9 @@
                                         </li>
                                     {/if}
                                     
-                                    {#if "client transfer prohibited" in result.status}
+                                    {#if result.status.includes("client transfer prohibited")}
                                         <li class="text-break" style="margin-bottom: 6px;font-size: 14px;">
-                                            <IconShield size={20} stroke={2} color={colorSuccess} class="mb-1" style="margin-right: 6px;" />
+                                            <IconLock size={20} stroke={2} color={colorSuccess} class="mb-1" style="margin-right: 6px;" />
                                             <span style="font-weight: 600;">Transfer-Lock</span> detected
                                         </li>
                                     {/if}
@@ -284,6 +269,20 @@
                                         <span style="font-weight: 600;">WHOIS-Privacy</span> detected
                                     </li>
                                     -->
+
+                                    <!-- registry status codes -->
+                                    {#if result.status && result.status.length > 0}
+                                        <div style="margin-top: 16px;">
+                                            <span class="text-truncate" style="font-weight: 500;font-size: 14px;">Status codes</span>
+                                            <ul class="list-unstyled mt-1" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);">
+                                                <li class="text-break text-lowercase" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
+                                                    {#each result.status as status}
+                                                        {status}<br>
+                                                    {/each}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    {/if}
                                 </ul>
                             </div>
                         </div>
@@ -395,7 +394,7 @@
                                         <ul class="list-unstyled" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);margin-top: 4px;">
                                             <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
                                                 {#each result.asn as asn}
-                                                    <img class="mb-1" src="https://flagcdn.com/16x12/{asn.country.toLowerCase()}.webp" alt="{asn.country}"> {asn.description} {asn.asn}<br>
+                                                    <img class="mb-1" src="https://flagcdn.com/16x12/{asn.country.toLowerCase()}.webp" alt="{asn.country}"> {asn.asn} {asn.description}<br>
                                                 {/each}
                                             </li>
                                         </ul>
@@ -413,7 +412,7 @@
                                 <path d="M17 7l-10 10"></path>
                                 <path d="M8 7l9 0l0 9"></path>
                             </svg></a></p>
-                <p style="color: rgb(174,174,174);font-size: 12px;">Usage of this service is permitted under its <a href="#" style="color: inherit;">Fair-use-Policy</a>. Traffic which does not comply with this policy or the <a href="#" style="color: inherit;">Terms of Service</a> will be blocked. <a href="https://github.com/berrysauce/ingredients/blob/main/LICENSE.md" style="color: inherit;">View the license for this service here</a>. No personal data is collected when using this service.</p>
+                <p style="color: rgb(174,174,174);font-size: 12px;">Usage of this service is permitted under its <a href="#" style="color: inherit;">Fair-use-Policy</a>. Traffic which does not comply with this policy or the <a href="https://berrysauce.dev/terms" style="color: inherit;">Terms of Service</a> will be blocked. <a href="https://github.com/berrysauce/rdaptastic/blob/main/LICENSE" style="color: inherit;">View the license for this service here</a>.</p>
             </footer>
         </div>
     </div>
