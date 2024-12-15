@@ -20,9 +20,9 @@
 
     const currentYear = new Date().getFullYear();
 
-    let feature_cf_turnstile: boolean = $state(false);
+    let feature_cf_turnstile: boolean = $state(true);
     posthog.onFeatureFlags(() => {
-        posthog.isFeatureEnabled("cf-turnstile") ? feature_cf_turnstile = true : false;
+        posthog.isFeatureEnabled("cf-turnstile") ? feature_cf_turnstile = true : null;
     })
 
     interface Result {
