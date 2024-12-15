@@ -13,11 +13,18 @@
         IconCake,
     } from "@tabler/icons-svelte";
     import { differenceInDays } from "date-fns";
+    import { posthog } from "posthog-js";
 
     const colorSuccess = "#26931d";
     const colorError = "#d72323";
 
     const currentYear = new Date().getFullYear();
+    const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
+
+    let feature_cf_turnstile: boolean = $state(false);
+    posthog.onFeatureFlags(() => {
+        posthog.isFeatureEnabled("cf-turnstile") ? feature_cf_turnstile = true : false;
+    })
 
     interface Result {
         status: Array<string>;
@@ -56,14 +63,17 @@
         resultError = null;
         resultLoading = true;
 
-        let formData = new FormData(event.target);
-        let turnstileResponse = formData.get("cf-turnstile-response");
-        console.log("CF Turnstile response", turnstileResponse)
+        let turnstileResponse = null;
+        if (feature_cf_turnstile) {
+            let formData = new FormData(event.target);
+            turnstileResponse = formData.get("cf-turnstile-response");
+            console.log("CF Turnstile response", turnstileResponse);
+        }
 
         event.preventDefault(); // Prevent form submission
 
         try {
-            if (!turnstileResponse) {
+            if (feature_cf_turnstile && !turnstileResponse) {
                 throw new Error("captcha")
             }
 
@@ -95,8 +105,11 @@
             resultError = (error as Error)?.message || "unknown"
         } finally {
             resultLoading = false;
-            // @ts-ignore
-            window.turnstile.reset(); // Reset the Turnstile widget
+
+            if (feature_cf_turnstile) {
+                // @ts-ignore
+                window.turnstile.reset(); // Reset the Turnstile widget
+            }
         }
     };
 
@@ -143,12 +156,14 @@
             <!-- FORM -->
             <form style="margin-bottom: 32px;margin-top: 48px;" onsubmit={handleSubmit}>
                 <div class="input-group">
-                    <input class="form-control" type="text" bind:value={domain} style="padding: 8px 16px;border-radius: 0px;background: rgba(255,255,255,0);border-top-right-radius: 0px;border-bottom-right-radius: 0px;outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);border-right-style: none;" placeholder="example.com" name="domain" required>
-                    <!-- Invisible Turnstile -->
-                    <div
-                        class="cf-turnstile"
-                        data-sitekey="0x4AAAAAAA2Mra45KtkZeImy"
-                    ></div>
+                    <input class="form-control" type="text" bind:value={domain} style="padding: 8px 16px;border-radius: 0px;background: rgba(255,255,255,0);border-top-right-radius: 0px;border-bottom-right-radius: 0px;outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);border-right-style: none;font-weight:500;" placeholder="example.com" name="domain" required>
+                    {#if feature_cf_turnstile}
+                        <!-- Invisible Turnstile -->
+                        <div
+                            class="cf-turnstile"
+                            data-sitekey="{TURNSTILE_SITE_KEY}"
+                        ></div>
+                    {/if}
                     <button class="btn btn-primary float-end" type="submit" style="border-radius: 0px;background: rgb(0,0,0);border-top-left-radius: 0px;border-bottom-left-radius: 0px;margin-left: -2px;padding: 8px 16px;color: rgb(255,255,255);outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);">
                         <IconSearch size={18} stroke={2} class="mb-1" style="margin-right: 4px;" />
                         Check

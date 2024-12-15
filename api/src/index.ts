@@ -4,6 +4,7 @@ import { env } from "hono/adapter";
 
 import { resolveNameserversAndFetchASN } from "./asn";
 import { fetchRdapUrl } from "./rdap";
+import { isFeatureEnabled } from "./posthog";
 
 const app = new Hono();
 
@@ -24,41 +25,49 @@ app.get("/", (c) => {
 });
 
 app.post("/v1/rdap", async (c) => {
+        const { POSTHOG_API_KEY } = env<{ POSTHOG_API_KEY: string }>(c)
+        const { POSTHOG_HOST } = env<{ POSTHOG_HOST: string }>(c)
+        const featureCfTurnstile = await isFeatureEnabled(
+            "cf-turnstile", POSTHOG_HOST, POSTHOG_API_KEY, c.req.header("cf-connecting-ip") || "anonymous"
+        );
+
         const body = await c.req.json();
         const full = c.req.query("full");
-
         // @ts-ignore
         const domain = body.domain;
-		const turnstileResponse = body.turnstile_response;
-		const remoteIP = c.req.header("cf-connecting-ip");
 
-		// validate capcha (Cloudflare Turnstile)
-		if (!turnstileResponse) {
-			c.status(400);
-			return c.text("No captcha provided");
-		} else {
-			const { TURNSTILE_SECRET } = env<{ TURNSTILE_SECRET: string }>(c)
-			const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-			const turnstileResult = await fetch(url, {
-				body: JSON.stringify({
-					secret: TURNSTILE_SECRET,
-					response: turnstileResponse,
-					remoteip: remoteIP
-				}),
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json"
-				}
-			});
+        if (featureCfTurnstile) {
+            const turnstileResponse = body.turnstile_response;
+            const remoteIP = c.req.header("cf-connecting-ip");
 
-			const turnstileOutcome = await turnstileResult.json();
+            // validate capcha (Cloudflare Turnstile)
+            if (!turnstileResponse) {
+                c.status(400);
+                return c.text("No captcha provided");
+            } else {
+                const { TURNSTILE_SECRET } = env<{ TURNSTILE_SECRET: string }>(c)
+                const url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+                const turnstileResult = await fetch(url, {
+                    body: JSON.stringify({
+                        secret: TURNSTILE_SECRET,
+                        response: turnstileResponse,
+                        remoteip: remoteIP
+                    }),
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
 
-			// @ts-ignore
-			if (!turnstileOutcome.success || !turnstileResult.ok) {
-				c.status(403);
-				return c.text("Captcha validation failed");
-			}
-		}
+                const turnstileOutcome = await turnstileResult.json();
+
+                // @ts-ignore
+                if (!turnstileOutcome.success || !turnstileResult.ok) {
+                    c.status(403);
+                    return c.text("Captcha validation failed");
+                }
+            }
+        }
 
         // @ts-ignore
         if (!domain) {

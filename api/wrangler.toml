@@ -4,8 +4,10 @@ compatibility_date = "2024-12-13"
 
 # compatibility_flags = [ "nodejs_compat" ]
 
-# [vars]
-# MY_VAR = "my-variable"
+[vars]
+TURNSTILE_SECRET = "0x4AAAAAAA2MrWHk722FV70j2zDi4mLe5_s"
+POSTHOG_API_KEY = "phc_rOMznyIIFLaEP4bK98xCjQtHCuENkqovXMbONBQ8lus"
+POSTHOG_HOST = "https://eu.i.posthog.com"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
