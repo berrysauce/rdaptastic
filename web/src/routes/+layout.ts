@@ -2,14 +2,10 @@ import posthog from 'posthog-js'
 import { browser } from '$app/environment';
 
 export const load = async () => {
-
-    const POSTHOG_API_KEY = import.meta.env.POSTHOG_API_KEY;
-    const POSTHOG_HOST = import.meta.env.POSTHOG_HOST;
-
     if (browser) {
         posthog.init(
-            POSTHOG_API_KEY,
-            { api_host: POSTHOG_HOST, person_profiles: "never" }
+            "phc_rOMznyIIFLaEP4bK98xCjQtHCuENkqovXMbONBQ8lus",
+            { api_host: "https://eu.i.posthog.com", person_profiles: "never" }
         )
     }
 

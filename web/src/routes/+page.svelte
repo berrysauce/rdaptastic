@@ -19,7 +19,6 @@
     const colorError = "#d72323";
 
     const currentYear = new Date().getFullYear();
-    const TURNSTILE_SITE_KEY = import.meta.env.TURNSTILE_SITE_KEY;
 
     let feature_cf_turnstile: boolean = $state(false);
     posthog.onFeatureFlags(() => {
@@ -161,7 +160,7 @@
                         <!-- Invisible Turnstile -->
                         <div
                             class="cf-turnstile"
-                            data-sitekey="{TURNSTILE_SITE_KEY}"
+                            data-sitekey="0x4AAAAAAA2Mra45KtkZeImy"
                         ></div>
                     {/if}
                     <button class="btn btn-primary float-end" type="submit" style="border-radius: 0px;background: rgb(0,0,0);border-top-left-radius: 0px;border-bottom-left-radius: 0px;margin-left: -2px;padding: 8px 16px;color: rgb(255,255,255);outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);">
