@@ -20,9 +20,10 @@
 
     const currentYear = new Date().getFullYear();
 
-    let feature_cf_turnstile: boolean = $state(true);
+    let feature_cf_turnstile: boolean = $state(false);
     posthog.onFeatureFlags(() => {
-        posthog.isFeatureEnabled("cf-turnstile") ? feature_cf_turnstile = true : null;
+        feature_cf_turnstile = posthog.isFeatureEnabled("cf-turnstile") || false;
+        console.log("CF Turnstile enabled:", feature_cf_turnstile);
     })
 
     interface Result {
@@ -66,9 +67,9 @@
         if (feature_cf_turnstile) {
             let formData = new FormData(event.target);
             turnstileResponse = formData.get("cf-turnstile-response");
-            console.log("CF Turnstile response", turnstileResponse);
+            console.log("CF Turnstile response:", turnstileResponse);
         }
-
+        
         event.preventDefault(); // Prevent form submission
 
         try {
@@ -157,6 +158,7 @@
                 <div class="input-group">
                     <input class="form-control" type="text" bind:value={domain} style="padding: 8px 16px;border-radius: 0px;background: rgba(255,255,255,0);border-top-right-radius: 0px;border-bottom-right-radius: 0px;outline: 0px !important;box-shadow: none !important;border: 2px solid rgb(0,0,0);border-right-style: none;font-weight:500;" placeholder="example.com" name="domain" required>
                     {#if feature_cf_turnstile}
+                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
                         <!-- Invisible Turnstile -->
                         <div
                             class="cf-turnstile"
