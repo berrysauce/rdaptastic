@@ -1,4 +1,5 @@
 import { ASNInfo, resolveNameserversAndFetchASN } from "./asn";
+import { isValidEmail } from "./utils";
 import localRdapServicesFile from "./rdap_services.json";
 
 interface RDAPServices {
@@ -238,6 +239,10 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				);
 				if (contactEntry) {
 					registrantData.contact_uri = contactEntry[3];
+
+					if (registrantData.contact_uri && isValidEmail(registrantData.contact_uri) && !registrantData.contact_uri.startsWith("mailto:")) {
+						registrantData.contact_uri = `mailto:${registrantData.contact_uri}`;
+					}
 				}
 			}
 		}

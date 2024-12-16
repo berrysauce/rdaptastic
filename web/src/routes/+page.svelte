@@ -342,7 +342,7 @@
                                                 {result.registrant.organization}<br>
                                             {/if}
                                             {#if result.registrant.contact_uri}
-                                                <a href="{result.registrant.contact_uri}" target="_blank" style="color: inherit;">Contact registrant (external link)</a><br>
+                                                <a href="{result.registrant.contact_uri}" target="_blank" style="color: inherit;">Contact registrant</a><br>
                                             {/if}
 
                                             {#if !result.registrant.name && !result.registrant.organization}

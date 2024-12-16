@@ -1,4 +1,5 @@
 {
     "org": "https://rdap.publicinterestregistry.org/rdap",
+    "dev": "https://www.registry.google/rdap",
     "de": "https://rdap.denic.de"
 }

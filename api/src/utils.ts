@@ -9,4 +9,9 @@ function isValidDomain(domain: string): boolean {
     return domainRegex.test(domain);
 }
 
-export { isValidDomain };
+function isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+export { isValidDomain, isValidEmail };
