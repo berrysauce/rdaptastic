@@ -36,13 +36,13 @@ async function resolveNameserversAndFetchASN(nameservers: string[]): Promise<ASN
           const ip = dnsData.Answer?.[0]?.data;
   
           if (!ip) {
-            throw new Error(`No IP found for nameserver: ${nameserver}`);
+            throw new Error(`No IP found for nameserver ${nameserver}`);
           }
   
           // Step 2: Fetch ASN information
           const asnResponse = await fetch(`${ASN_API}/${ip}/json`);
           if (!asnResponse.ok) {
-            throw new Error(`ASN query failed for IP: ${ip}`);
+            throw new Error(`ASN query failed for IP ${ip}`);
           }
   
           const asnData = await asnResponse.json() as { org?: string, country?: string };

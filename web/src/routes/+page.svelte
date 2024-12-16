@@ -8,8 +8,6 @@
         IconShieldChevron,
         IconLock,
         IconLockOff,
-        IconWorld,
-        IconMailExclamation,
         IconCake,
     } from "@tabler/icons-svelte";
     import { differenceInDays } from "date-fns";
@@ -36,7 +34,6 @@
         status: Array<string>;
         registrar: {
             name: string;
-            domain: string;
             abuse: {
                 email: string;
                 phone: string;
@@ -304,32 +301,22 @@
                                     <h2 class="fs-5" style="font-weight: 500;letter-spacing: -0.5px;color: rgb(0,0,0);margin-bottom: 16px;">Registrar</h2>
                                 </div>
                                 <div class="col">
-                                    <ul class="list-unstyled">
-                                        <!-- Name & domain -->
-                                        <li class="text-break" style="margin-bottom: 16px;font-weight: 600;font-size: 14px;">{result.registrar.name}</li>
-                                        <li class="text-break text-lowercase" style="margin-bottom: 6px;font-size: 14px;">
-                                            {#if result.registrar.domain}
-                                                <IconWorld size={20} stroke={2} class="mb-1" style="margin-right: 6px;" />
-                                                {result.registrar.domain}
-                                            {/if}
-                                        </li>
-                                        <!-- Abuse contacts -->
-                                        {#if result.registrar.abuse.email || result.registrar.abuse.phone}
-                                            <li class="text-break" style="margin-bottom: 4px;font-size: 14px;">
-                                                <IconMailExclamation size={20} stroke={2} class="mb-1" style="margin-right: 6px;" />
-                                                Abuse
+                                    <ul class="list-unstyled" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;margin-top: 4px;margin-bottom: 6px;color: rgba(33,37,41,0.8);">
+                                        <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 500;">{result.registrar.name}</li>
+                                    </ul>
+                                    {#if result.registrar.abuse.email || result.registrar.abuse.phone}
+                                        <span class="text-truncate" style="font-weight: 500;font-size: 14px;">Abuse contacts</span>
+                                        <ul class="list-unstyled" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;margin-top: 4px;margin-bottom: 6px;color: rgba(33,37,41,0.8);">
+                                            <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
                                                 {#if result.registrar.abuse.email}
-                                                    <a href="mailto:{result.registrar.abuse.email}" style="color: inherit;font-weight: 500;">Email</a>
-                                                {/if}
-                                                {#if result.registrar.abuse.email && result.registrar.abuse.phone}
-                                                    <span style="color: rgba(33, 37, 41, 0.5);"> / </span>
+                                                    Email: <a href="mailto:{result.registrar.abuse.email}" target="_blank" style="color: inherit;">{result.registrar.abuse.email}</a><br/>
                                                 {/if}
                                                 {#if result.registrar.abuse.phone}
-                                                    <a href="{result.registrar.abuse.phone}" style="color: inherit;font-weight: 500;">Phone</a>
+                                                    Phone: <a href="tel:{result.registrar.abuse.phone}" target="_blank" style="color: inherit;">{result.registrar.abuse.phone}</a><br/>
                                                 {/if}
                                             </li>
-                                        {/if}
-                                    </ul>
+                                        </ul>
+                                    {/if}
                                 </div>
                             </div>
                         </div>
@@ -355,7 +342,7 @@
                                                 {result.registrant.organization}<br>
                                             {/if}
                                             {#if result.registrant.contact_uri}
-                                                <a href="{result.registrant.contact_uri}" style="color: inherit;font-weight: 500;">Contact (external link)</a><br>
+                                                <a href="{result.registrant.contact_uri}" target="_blank" style="color: inherit;">Contact registrant (external link)</a><br>
                                             {/if}
 
                                             {#if !result.registrant.name && !result.registrant.organization}

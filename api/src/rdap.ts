@@ -9,7 +9,6 @@ interface RDAPData {
 	status: string[] | null;
 	registrar: {
 		name: string | null;
-		domain: string | null;
 		abuse: {
 			email: string | null;
 			phone: string | null;
@@ -61,7 +60,7 @@ const fetchRdapUrl = async (tld: string): Promise<string> => {
 		rdapService = ianaRdapServices ? ianaRdapServices[1][0] : null;
 
 		if (!rdapService) {
-			throw new Error(`No RDAP server found for TLD: ${tld}`);
+			throw new Error(`No RDAP server found for TLD (${tld})`);
 		}
 	}
 
@@ -80,7 +79,7 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 	const rdapResponse = await fetch(`${rdapService}/domain/${domain}`);
 
 	if (rdapResponse.status !== 200) {
-		throw new Error(`Domain not found on RDAP service: ${rdapResponse.status}`);
+		throw new Error(`Domain not found on RDAP service (${rdapResponse.status})`);
 	}
 
 	const rdapData: any = await rdapResponse.json();
@@ -91,7 +90,6 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 	// get registrar
 	let registrarData: RDAPData["registrar"] = {
 		name: null,
-		domain: null,
 		abuse: {
 			email: null,
 			phone: null,
@@ -127,15 +125,14 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 					(entry: any) => entry[0] === "email"
 				);
 				if (emailEntry) {
-					registrarData.abuse.email = emailEntry[3]; // email
-					registrarData.domain = emailEntry[3].split("@")[1];
+					registrarData.abuse.email = emailEntry[3].replace("mailto:", ""); // email
 				}
 
 				const phoneEntry = abuseVcard.find(
 					(entry: any) => entry[0] === "tel"
 				);
 				if (phoneEntry) {
-					registrarData.abuse.phone = phoneEntry[3]; // phone
+					registrarData.abuse.phone = phoneEntry[3].replace("tel:", ""); // phone
 				}
 			}
 		}
@@ -225,6 +222,14 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 							registrantData.country = lastElement.toUpperCase();
 							registrantData.address.pop(); // remove country code from address
 						}
+					}
+
+					if (registrantData.address && registrantData.country) {
+						// remove country code from address
+						// this applies if registrant country is set but also included in address
+						registrantData.address = registrantData.address.filter(
+							(entry: string) => entry !== registrantData.country
+						);
 					}
 				}
 
