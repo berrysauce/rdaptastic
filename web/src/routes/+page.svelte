@@ -333,7 +333,7 @@
                                     <ul class="list-unstyled mt-1" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);">
                                         <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
                                             {#if result.registrant.kind}
-                                                {result.registrant.kind}<br>
+                                                {result.registrant.kind.toUpperCase()}<br>
                                             {/if}
                                             {#if result.registrant.name}
                                                 {result.registrant.name}<br>

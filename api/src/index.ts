@@ -26,9 +26,16 @@ app.get("/", (c) => {
 
 app.post("/v1/rdap", async (c) => {
     const body = await c.req.json();
-    const full = c.req.query("full");
-    // @ts-ignore
-    const domain = body.domain;
+    let domain = body.domain;
+
+    // check if domain is provided
+    if (!domain) {
+        c.status(400);
+        return c.text("No domain provided");
+    }
+
+    // normalize domain
+    domain = domain.trim().toLowerCase();
 
     // check if domain is valid
     if (!isValidDomain(domain)) {
@@ -78,12 +85,6 @@ app.post("/v1/rdap", async (c) => {
         }
     }
 
-    // @ts-ignore
-    if (!domain) {
-        c.status(400);
-        return c.text("No domain provided");
-    }
-
     //try {
     const tld: string = domain.split(".").pop() || "";
 
@@ -92,7 +93,7 @@ app.post("/v1/rdap", async (c) => {
         rdapUrl = await fetchRdapUrl(tld);
     } catch {
         c.status(404);
-        return c.text("No RDAP server found for TLD");
+        return c.text(`No RDAP server found for .${tld} TLD`);
     }
 
     let rdapData;

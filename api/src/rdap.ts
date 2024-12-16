@@ -65,6 +65,11 @@ const fetchRdapUrl = async (tld: string): Promise<string> => {
 		}
 	}
 
+	// remove trailing slash
+	if (rdapService.endsWith("/")) {
+		rdapService = rdapService.slice(0, -1);
+	}
+
 	return rdapService;
 };
 
@@ -206,10 +211,10 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 					registrantData.country = addressEntry[1]["cc"];
 					registrantData.address = addressEntry[3];
 
-					// remove empty entries from address
+					// remove empty or null entries from address
 					if (registrantData.address) {
 						registrantData.address = registrantData.address.filter(
-							(entry: string) => entry !== ""
+							(entry: string | null) => typeof entry === "string" && entry.trim()
 						);
 					}
 
