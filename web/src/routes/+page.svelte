@@ -32,7 +32,7 @@
         console.log("ASN lookups enabled:", feature_asn_lookups);
     })
 
-    interface Result {
+    interface RDAPData {
         status: Array<string>;
         registrar: {
             name: string;
@@ -41,6 +41,14 @@
                 email: string;
                 phone: string;
             };
+        };
+        registrant: {
+            kind: string | null;
+            name: string | null;
+            organization: string | null;
+            address: string[] | null;
+            country: string | null;
+            contact_uri: string | null;
         };
         dates: {
             registered: string | null;
@@ -59,7 +67,7 @@
     }
 
     let domain: string | null = $state(null);
-    let result: Result | null = $state(null);
+    let result: RDAPData | null = $state(null);
     let resultLoading: boolean = $state(false);
     let resultError: string | null = $state(null);
 
@@ -205,7 +213,7 @@
                                         (result.dates.expires && (daysSince(result.dates.expires) >= 1 || result.status.includes("pending delete"))) ||
                                         (result.dates.expires && daysUntil(result.dates.expires) <= 30) ||
                                         !result.dnssec ||
-                                        !result.status.includes("client transfer prohibited")
+                                        (!result.status.includes("client transfer prohibited") && !result.status.includes("server transfer prohibited"))
                                     }
                                         <li class="text-break" style="margin-bottom: 16px;font-weight: 700;color: {colorError};font-size: 14px;">
                                             <IconAlertCircleFilled size={20} stroke={2} class="mb-1" style="margin-right: 6px;" />
@@ -241,7 +249,7 @@
                                         </li>
                                     {/if}
 
-                                    {#if !result.status.includes("client transfer prohibited")}
+                                    {#if !result.status.includes("client transfer prohibited") && !result.status.includes("server transfer prohibited")}
                                         <li class="text-break" style="margin-bottom: 6px;font-size: 14px;">
                                             <IconLockOff size={20} stroke={2} color={colorError} class="mb-1" style="margin-right: 6px;" />
                                             <span style="font-weight: 600;">Transfer-Lock</span> not detected
@@ -256,7 +264,7 @@
                                         </li>
                                     {/if}
                                     
-                                    {#if result.status.includes("client transfer prohibited")}
+                                    {#if result.status.includes("client transfer prohibited") || result.status.includes("server transfer prohibited")}
                                         <li class="text-break" style="margin-bottom: 6px;font-size: 14px;">
                                             <IconLock size={20} stroke={2} color={colorSuccess} class="mb-1" style="margin-right: 6px;" />
                                             <span style="font-weight: 600;">Transfer-Lock</span> detected
@@ -322,6 +330,53 @@
                                             </li>
                                         {/if}
                                     </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {/if}
+
+                    <!-- REGISTRANT -->
+                    {#if result.registrant && (result.registrant.name || result.registrant.organization || result.registrant.address || result.registrant.contact_uri)}
+                        <div style="margin-bottom: 16px;border-width: 2px;border-top-style: solid;border-top-color: rgb(0,0,0);">
+                            <div class="row" style="margin-top: 16px;">
+                                <div class="col-md-4 col-xl-4">
+                                    <h2 class="fs-5" style="font-weight: 500;letter-spacing: -0.5px;color: rgb(0,0,0);margin-bottom: 16px;">Registrant</h2>
+                                </div>
+                                <div class="col">
+                                    <ul class="list-unstyled mt-1" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);">
+                                        <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
+                                            {#if result.registrant.kind}
+                                                {result.registrant.kind}<br>
+                                            {/if}
+                                            {#if result.registrant.name}
+                                                {result.registrant.name}<br>
+                                            {/if}
+                                            {#if result.registrant.organization}
+                                                {result.registrant.organization}<br>
+                                            {/if}
+                                            {#if result.registrant.contact_uri}
+                                                <a href="{result.registrant.contact_uri}" style="color: inherit;font-weight: 500;">Contact (external link)</a><br>
+                                            {/if}
+
+                                            {#if !result.registrant.name && !result.registrant.organization}
+                                                DATA REDACTED<br>
+                                            {/if}
+                                        </li>
+                                    </ul>
+
+                                    <!-- Address -->
+                                    {#if result.registrant.address && result.registrant.address.length > 0}
+                                        <ul class="list-unstyled mt-1" style="background: #f9f9f9;border: 1px solid rgb(224,224,224);border-radius: 0px;padding: 6px 12px;color: rgba(33,37,41,0.8);">
+                                            <li class="text-break" style="margin-bottom: 0px;font-family: 'Roboto Mono', monospace;font-size: 14px;line-height: 24px;font-weight: 400;">
+                                                {#each result.registrant.address as line}
+                                                    {line}<br>
+                                                {/each}
+                                                {#if result.registrant.country}
+                                                    <img class="mb-1" src="https://flagcdn.com/16x12/{result.registrant.country.toLowerCase()}.webp" alt="{result.registrant.country}"> {result.registrant.country}
+                                                {/if}
+                                            </li>
+                                        </ul>
+                                    {/if}
                                 </div>
                             </div>
                         </div>

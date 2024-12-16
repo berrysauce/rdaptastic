@@ -1,5 +1,3 @@
-import { bodyLimit } from "hono/body-limit";
-
 type ASNInfo = {
     nameserver: string;
     ip?: string;
@@ -8,7 +6,14 @@ type ASNInfo = {
     country?: string;
     error?: string;
 };
-  
+
+/**
+ * Resolves the IP addresses of given nameservers and fetches ASN information for each.
+ *
+ * @param {string[]} nameservers - The list of nameservers to resolve and fetch ASN information for.
+ * @returns {Promise<ASNInfo[]>} A promise that resolves with an array of ASN information objects.
+ * @throws {Error} If the DNS query or ASN fetch operation fails.
+ */
 async function resolveNameserversAndFetchASN(nameservers: string[]): Promise<ASNInfo[]> {
     const DNS_API = "https://cloudflare-dns.com/dns-query";
     const ASN_API = "https://ipinfo.io";
@@ -69,5 +74,5 @@ async function resolveNameserversAndFetchASN(nameservers: string[]): Promise<ASN
     return results;
 }
   
-export { resolveNameserversAndFetchASN }
+export { ASNInfo, resolveNameserversAndFetchASN }
   
