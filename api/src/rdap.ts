@@ -239,10 +239,6 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 							(entry: string) => entry !== registrantData.country
 						);
 					}
-
-					if (registrantData.address != null && registrantData.address.length === 0) {
-						registrantData.address = null; // set to null if no address fields found
-					}
 				}
 
 				const contactEntry = registrantVcard.find(
@@ -257,6 +253,10 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				}
 			}
 		}
+	}
+
+	if (registrantData.address && registrantData.address.length === 0) {
+		registrantData.address = null; // set to null if no address fields found
 	}
 
 	// get dates
