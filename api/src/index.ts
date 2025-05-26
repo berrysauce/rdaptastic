@@ -56,7 +56,7 @@ app.post("/v1/rdap", async (c) => {
         const turnstileResponse = body.turnstile_response;
         const remoteIP = c.req.header("cf-connecting-ip");
 
-        // validate capcha (Cloudflare Turnstile)
+        // validate captcha (Cloudflare Turnstile)
         if (!turnstileResponse) {
             c.status(400);
             return c.text("No CAPTCHA response provided");

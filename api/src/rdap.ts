@@ -132,6 +132,7 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				);
 				if (emailEntry) {
 					registrarData.abuse.email = emailEntry[3].replace("mailto:", ""); // email
+					if (registrarData.abuse.email == "") { registrarData.abuse.email = null; }
 				}
 
 				const phoneEntry = abuseVcard.find(
@@ -139,6 +140,7 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				);
 				if (phoneEntry) {
 					registrarData.abuse.phone = phoneEntry[3].replace("tel:", ""); // phone
+					if (registrarData.abuse.phone == "") { registrarData.abuse.phone = null; }
 				}
 			}
 		}
