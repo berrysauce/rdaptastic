@@ -190,6 +190,7 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				);
 				if (kindEntry) {
 					registrantData.kind = kindEntry[3];
+					if (registrantData.kind == "") { registrantData.kind = null; }
 				}
 
 				const fnEntry = registrantVcard.find(
@@ -197,6 +198,7 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				);
 				if (fnEntry) {
 					registrantData.name = fnEntry[3];
+					if (registrantData.name == "") { registrantData.name = null; }
 				}
 
 				const organizationEntry = registrantVcard.find(
@@ -204,6 +206,7 @@ const fetchRdapData = async (rdapService: string, domain: string, featureASNLook
 				);
 				if (organizationEntry) {
 					registrantData.organization = organizationEntry[3];
+					if (registrantData.organization == "") { registrantData.organization = null; }
 				}
 
 				const addressEntry = registrantVcard.find(

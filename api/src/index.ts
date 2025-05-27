@@ -108,4 +108,9 @@ app.post("/v1/rdap", async (c) => {
     return c.json(rdapData);
 });
 
+// Apple App Attestation (A3)
+app.post("/v1/a3/rdap", async (c) => {
+    // pass
+});
+
 export default app;
