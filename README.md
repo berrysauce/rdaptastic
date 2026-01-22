@@ -5,8 +5,10 @@
 
 rdaptastic is a modern lookup tool that uses the Registration Data Access Protocol (RDAP), the successor to WHOIS. It provides a clean summary of a domain's registry information, tracks historical changes, and can notify you of updates when something changes.
 
-> [!WARNING]
-> This project is still under active development. It may be unstable, deliver inaccurate data, or exhibit unreliable behavior. At this stage, self-hosting or contributing is not recommended. Stay tuned for updates!
+> [!IMPORTANT]
+> rdaptastic Web is unavailable for now, while I'm reworking it behind the scenes. You can download rdaptastic Mobile for free on the App Store right now → [currumb.in/rdaptastic](https://currumb.in/rdaptastic)
+>
+> <a href="https://currumb.in/rdaptastic"><img alt="Download on the App Store" src="https://rdaptastic.com/assets/img/appstore/white.svg?h=0a3600e430f01b1408ea6337f5f79998"></a>
 
 <img alt="RDAPtastic Screenshot" src="https://share.berrysauce.dev/CleanShot-2024-12-14-at-21.33.53-F6qGy.png#e07425c36b347a4818407620dd12bddb86496526e222e1ef38ab678e057c386e">
 
